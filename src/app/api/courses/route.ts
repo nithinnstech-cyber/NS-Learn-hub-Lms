@@ -25,10 +25,10 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    const enriched = courses.map((c) => ({
+    const enriched = courses.map((c: any) => ({
       ...c,
-      totalLessons: c.sections.reduce((acc, s) => acc + s._count.lessons, 0),
-      enrolledCount: c._count.enrollments,
+      totalLessons: (c.sections as any[]).reduce((acc, s) => acc + (s._count?.lessons || 0), 0),
+      enrolledCount: c._count?.enrollments || 0,
     }));
 
     return NextResponse.json({ courses: enriched });

@@ -58,8 +58,8 @@ export async function GET() {
     });
 
     const enriched = await Promise.all(
-      enrollments.map(async (e) => {
-        const totalLessons = e.course.sections.reduce((acc, s) => acc + s._count.lessons, 0);
+      enrollments.map(async (e: any) => {
+        const totalLessons = (e.course.sections as any[]).reduce((acc: number, s: any) => acc + (s._count?.lessons || 0), 0);
         const completedCount = await prisma.progress.count({
           where: { userId: session.userId, courseId: e.courseId },
         });

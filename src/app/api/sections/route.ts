@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     if (playlistId) {
       const playlistItems = await getPlaylistItems(playlistId);
       lessonData = await Promise.all(
-        playlistItems.map(async (item, idx) => {
+        playlistItems.map(async (item: any, idx) => {
           const details = await getYouTubeVideoDetails(item.videoId);
           return {
             title: item.title,
