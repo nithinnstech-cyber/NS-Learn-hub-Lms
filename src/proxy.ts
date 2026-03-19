@@ -5,7 +5,7 @@ const publicRoutes = ['/login', '/register'];
 const authRoutes = ['/login', '/register'];
 const instructorRoutes = ['/instructor'];
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   const isPublic = publicRoutes.some((r) => path === r);
