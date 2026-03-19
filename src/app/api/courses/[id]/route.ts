@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/session';
 
-export async function GET(_req: NextRequest, ctx: RouteContext<'/api/courses/[id]'>) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await ctx.params;
+    const { id } = await params;
     const course = await prisma.course.findUnique({
       where: { id },
       include: {
@@ -37,7 +37,7 @@ export async function GET(_req: NextRequest, ctx: RouteContext<'/api/courses/[id
         const progresses = await prisma.progress.findMany({
           where: { userId: session.userId, courseId: id },
         });
-        userProgress = progresses.map((p) => p.lessonId);
+        userProgress = progresses.map((p: { lessonId: string }) => p.lessonId);
       }
     }
 
@@ -48,14 +48,14 @@ export async function GET(_req: NextRequest, ctx: RouteContext<'/api/courses/[id
   }
 }
 
-export async function PATCH(req: NextRequest, ctx: RouteContext<'/api/courses/[id]'>) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getSession();
     if (!session || (session.role !== 'INSTRUCTOR' && session.role !== 'ADMIN')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = await ctx.params;
+    const { id } = await params;
     const body = await req.json();
 
     const course = await prisma.course.update({
@@ -70,14 +70,14 @@ export async function PATCH(req: NextRequest, ctx: RouteContext<'/api/courses/[i
   }
 }
 
-export async function DELETE(_req: NextRequest, ctx: RouteContext<'/api/courses/[id]'>) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getSession();
     if (!session || (session.role !== 'INSTRUCTOR' && session.role !== 'ADMIN')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = await ctx.params;
+    const { id } = await params;
     await prisma.course.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
