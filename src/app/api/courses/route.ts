@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
     const enriched = courses.map((c: any) => ({
       ...c,
-      totalLessons: (c.sections as any[]).reduce((acc, s) => acc + (s._count?.lessons || 0), 0),
+      totalLessons: (c.sections as any[]).reduce((acc: number, s: any) => acc + (s._count?.lessons || 0), 0),
       enrolledCount: c._count?.enrollments || 0,
     }));
 
