@@ -1,0 +1,128 @@
+// Prisma Schema for LearnHub LMS
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  avatar    String?
+  bio       String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  courses     Course[]     @relation("InstructorCourses")
+  enrollments Enrollment[]
+  progress    Progress[]
+
+  @@map("users")
+}
+
+model Course {
+  id           String   @id @default(uuid())
+  title        String
+  description  String   @db.Text
+  thumbnail    String?
+  category     String
+  level        Level    @default(BEGINNER)
+  isPublished  Boolean  @default(false)
+  totalLessons Int      @default(0)
+  
+  instructorId String
+  instructor   User     @relation("InstructorCourses", fields: [instructorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  sections    Section[]
+  enrollments Enrollment[]
+
+  @@map("courses")
+}
+
+model Section {
+  id       String @id @default(uuid())
+  title    String
+  order    Int
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  lessons Lesson[]
+
+  @@map("sections")
+}
+
+model Lesson {
+  id           String  @id @default(uuid())
+  title        String
+  description  String? @db.Text
+  youtubeUrl   String
+  youtubeId    String
+  thumbnail    String?
+  duration     String?
+  order        Int
+  sectionId    String
+  section      Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  progress Progress[]
+
+  @@map("lessons")
+}
+
+model Enrollment {
+  id       String @id @default(uuid())
+  userId   String
+  courseId String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  enrolledAt  DateTime @default(now())
+  completedAt DateTime?
+
+  @@unique([userId, courseId])
+  @@map("enrollments")
+}
+
+model Progress {
+  id       String @id @default(uuid())
+  userId   String
+  lessonId String
+  courseId String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  completedAt DateTime @default(now())
+
+  @@unique([userId, lessonId])
+  @@map("progress")
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum Level {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
